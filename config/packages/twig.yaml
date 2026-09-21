@@ -1,0 +1,8 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    globals:
+        app_name: 'Mudi SACCO Support'
+
+when@test:
+    twig:
+        strict_variables: true

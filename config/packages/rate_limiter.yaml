@@ -1,0 +1,5 @@
+# Runtime rate limiting is intentionally not enabled yet because this skeleton does not
+# include symfony/lock, which Symfony requires for configured limiters.
+# Install symfony/lock before enabling login/api throttling in this file.
+framework:
+    rate_limiter: ~

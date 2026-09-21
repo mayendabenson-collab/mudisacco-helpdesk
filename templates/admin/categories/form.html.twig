@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ mode == 'new' ? 'New Category' : 'Edit ' ~ category.name }} | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}{{ mode == 'new' ? 'New Category' : 'Edit Category' }}{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_category_index'), label: 'Back to categories', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section" style="max-width: 720px;">
+    <p class="section-kicker">Ticket routing</p>
+    <h2>{{ mode == 'new' ? 'Create ticket category' : 'Edit: ' ~ category.name }}</h2>
+
+    {% if errors is not empty %}
+        <div class="alert alert--error" style="margin-bottom: var(--sp-4);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>
+                <strong>Please fix the following:</strong>
+                <ul style="margin: 4px 0 0 16px; padding: 0;">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="post" class="stack-form">
+        <input type="hidden" name="_token" value="{{ csrf_token(mode == 'new' ? 'category_create' : 'category_edit') }}">
+
+        <label class="form-field">
+            <span>Category Name *</span>
+            <input type="text" id="name" name="name" class="input" required
+                   value="{{ app.request.request.get('name', category.name) }}"
+                   placeholder="e.g. Loan Disbursement Inquiry">
+        </label>
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span>Code Identifier *</span>
+                <input type="text" id="code" name="code" class="input" style="font-family: monospace; text-transform: uppercase;" required
+                       value="{{ app.request.request.get('code', category.code) }}"
+                       placeholder="e.g. LOAN_DISB">
+                <small class="muted">Unique uppercase code (e.g. SAVINGS_WITHDRAWAL)</small>
+            </label>
+
+            <label class="form-field">
+                <span>Assigned Department *</span>
+                <select id="department_id" name="department_id" class="input" required>
+                    <option value="">Select department...</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" 
+                            {% if app.request.request.get('department_id', category.department ? category.department.id : '') == dept.id %}selected{% endif %}>
+                            {{ dept.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <label class="form-field">
+            <span>Default Priority</span>
+            <select id="default_priority" name="default_priority" class="input">
+                {% for prio in ['low', 'medium', 'high', 'critical'] %}
+                    <option value="{{ prio }}"
+                        {% if app.request.request.get('default_priority', category.defaultPriority.value) == prio %}selected{% endif %}>
+                        {{ prio|capitalize }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label class="form-field">
+            <span>Description (Optional)</span>
+            <textarea id="description" name="description" class="input textarea" rows="3"
+                      placeholder="Brief explanation of when members or staff should use this category...">{{ app.request.request.get('description', category.description) }}</textarea>
+        </label>
+
+        <label class="checkbox-field">
+            <input type="checkbox" name="active" value="1"
+                   {% if app.request.request.get('active', category.active) %}checked{% endif %}>
+            <span>Active (visible in ticket creation forms)</span>
+        </label>
+
+        <div class="form-actions" style="margin-top: var(--sp-4);">
+            <button type="submit" class="button button--primary">
+                {{ mode == 'new' ? 'Create Category' : 'Save Changes' }}
+            </button>
+            <a href="{{ path('admin_category_index') }}" class="button button--secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

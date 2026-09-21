@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Staff Performance | {{ app_name }}{% endblock %}
+{% block page_heading %}Staff performance{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('staff_performance_report_csv'), label: 'Download CSV', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Administrator report</p>
+                <h2>Assignment and closure performance</h2>
+                <p class="muted">Every handoff is listed. Automatic assignments have no assigning staff member; manual assignments show who passed responsibility.</p>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead><tr><th>Responsible staff</th><th>Tickets closed</th><th>Total time</th><th>Average time to close</th></tr></thead>
+                <tbody>
+                {% for summary in summaries %}
+                    <tr><td><strong>{{ summary.name }}</strong></td><td>{{ summary.closed }}</td><td>{{ summary.totalDuration }}</td><td><strong>{{ summary.averageDuration }}</strong></td></tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 4, title: 'No closed tickets yet', message: 'Performance data will appear after assigned tickets are closed.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header"><div><p class="section-kicker">Full assignment history</p><h2>Automatic and manual handoffs</h2></div></div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead><tr><th>Ticket</th><th>Type</th><th>Assigned to</th><th>Assigned by</th><th>Assigned at</th><th>Closed at</th><th>Time held</th><th>Closing assignment</th></tr></thead>
+                <tbody>
+                {% for row in ticketRows %}
+                    <tr>
+                        <td><a class="table-link" href="{{ path('ticket_show', { id: row.ticket.id }) }}">{{ row.ticket.reference }}</a><br><span class="muted">{{ row.ticket.subject }}</span></td>
+                        <td>{{ row.assignmentType }}</td><td>{{ row.staffName }}</td><td>{{ row.assignedBy }}</td>
+                        <td class="muted">{{ row.assignedAt|date('M j, Y H:i') }}</td><td class="muted">{{ row.ticket.closedAt|date('M j, Y H:i') }}</td><td><strong>{{ row.duration }}</strong></td><td>{{ row.isClosingAssignment ? 'Yes' : 'No' }}</td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 8, title: 'No assignment history yet', message: 'Closed ticket assignments will appear here.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

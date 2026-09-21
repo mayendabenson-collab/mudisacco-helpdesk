@@ -1,0 +1,136 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'teams')]
+class Team
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+
+    #[ORM\Column(length: 40, unique: true)]
+    private string $code = '';
+
+    #[ORM\Column(length: 120)]
+    private string $name = '';
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\ManyToOne(targetEntity: Department::class, inversedBy: 'teams')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Department $department;
+
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'teams')]
+    private Collection $members;
+
+    #[ORM\Column]
+    private bool $active = true;
+
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+        $this->members = new ArrayCollection();
+    }
+
+    public function getId(): Uuid
+    {
+        return $this->id;
+    }
+
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = strtoupper(trim($code));
+
+        return $this;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = trim($name);
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description !== null ? trim($description) : null;
+
+        return $this;
+    }
+
+    public function getDepartment(): Department
+    {
+        return $this->department;
+    }
+
+    public function setDepartment(Department $department): self
+    {
+        $this->department = $department;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getMembers(): Collection
+    {
+        return $this->members;
+    }
+
+    public function addMember(User $user): self
+    {
+        if (!$this->members->contains($user)) {
+            $this->members->add($user);
+            $user->getTeams()->add($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMember(User $user): self
+    {
+        if ($this->members->removeElement($user)) {
+            $user->getTeams()->removeElement($this);
+        }
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+}

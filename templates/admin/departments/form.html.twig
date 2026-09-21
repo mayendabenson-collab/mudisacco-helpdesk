@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ mode == 'new' ? 'New Department' : 'Edit ' ~ department.name }} | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}{{ mode == 'new' ? 'New Department' : 'Edit Department' }}{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_department_index'), label: 'Back to departments', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section" style="max-width:560px;">
+    {% for error in errors %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endfor %}
+
+    <form class="stack-form" method="post">
+        <input type="hidden" name="_token"
+               value="{{ csrf_token(mode == 'new' ? 'dept_create' : 'dept_edit_' ~ department.id) }}">
+
+        <label class="form-field" for="name">
+            <span>Department name <span class="required">*</span></span>
+            <input class="input" id="name" type="text" name="name"
+                   value="{{ department.name }}" required maxlength="120">
+        </label>
+
+        <label class="form-field" for="code">
+            <span>Code <small class="muted">(unique, uppercase, e.g. LOANS)</small> <span class="required">*</span></span>
+            <input class="input" id="code" type="text" name="code"
+                   value="{{ department.code }}" required maxlength="40" pattern="[A-Z0-9_]{2,40}"
+                   style="text-transform:uppercase;">
+        </label>
+
+        <label class="form-field" for="description">
+            <span>Description</span>
+            <textarea class="input textarea" id="description" name="description" rows="3">{{ department.description }}</textarea>
+        </label>
+
+        {% if mode == 'edit' %}
+        <label class="form-field checkbox-field">
+            <input type="checkbox" name="active" value="1" {{ department.active ? 'checked' : '' }}>
+            <span>Active</span>
+        </label>
+        {% endif %}
+
+        <div class="form-actions">
+            <button class="button button--primary" type="submit">
+                {{ mode == 'new' ? 'Create department' : 'Save changes' }}
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

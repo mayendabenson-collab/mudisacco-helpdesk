@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports | {{ app_name }}{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Operations overview</p>
+                <h2>Ticket performance summary</h2>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-card__label">Departments</span>
+                <strong class="stat-card__value">{{ departmentRows|length }}</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card__label">Branches</span>
+                <strong class="stat-card__value">{{ branchRows|length }}</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card__label">SLA statuses</span>
+                <strong class="stat-card__value">{{ slaRows|length }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Report dashboard</p>
+                <h2>Available reports</h2>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <a class="info-card" href="{{ path('report_management_summary') }}">
+                <strong>Management summary</strong>
+                <span>Leadership view with totals, overdue workload, escalations, and branch/department hotspots.</span>
+            </a>
+            <a class="info-card" href="{{ path('report_department_performance') }}">
+                <strong>Department performance</strong>
+                <span>Open, resolved, overdue, and workload by department.</span>
+            </a>
+            <a class="info-card" href="{{ path('report_branch_performance') }}">
+                <strong>Branch performance</strong>
+                <span>Compare ticket volume and operational health across branches.</span>
+            </a>
+            <a class="info-card" href="{{ path('report_sla_overview') }}">
+                <strong>SLA overview</strong>
+                <span>Track due soon, breached, escalated, and met service levels.</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Quick exports</p>
+                <h2>CSV downloads</h2>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <a class="info-card" href="{{ path('report_department_performance_csv') }}">
+                <strong>Department CSV</strong>
+                <span>Download the department performance table.</span>
+            </a>
+            <a class="info-card" href="{{ path('report_branch_performance_csv') }}">
+                <strong>Branch CSV</strong>
+                <span>Download the branch performance table.</span>
+            </a>
+            <a class="info-card" href="{{ path('report_sla_overview_csv') }}">
+                <strong>SLA CSV</strong>
+                <span>Download the SLA overview table.</span>
+            </a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ mode == 'new' ? 'New SLA Rule' : 'Edit SLA Rule' }} | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}{{ mode == 'new' ? 'New SLA Rule' : 'Edit SLA Rule' }}{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_sla_index'), label: 'Back to SLA rules', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section" style="max-width: 760px;">
+    <p class="section-kicker">Service level targets</p>
+    <h2>{{ mode == 'new' ? 'Define SLA policy' : 'Update SLA policy' }}</h2>
+
+    {% if errors is not empty %}
+        <div class="alert alert--error" style="margin-bottom: var(--sp-4);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>
+                <strong>Please fix the following:</strong>
+                <ul style="margin: 4px 0 0 16px; padding: 0;">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="post" class="stack-form">
+        <input type="hidden" name="_token" value="{{ csrf_token(mode == 'new' ? 'sla_create' : 'sla_edit') }}">
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span>Ticket Priority *</span>
+                <select id="priority" name="priority" class="input" required>
+                    {% for prio in ['low', 'medium', 'high', 'critical'] %}
+                        <option value="{{ prio }}"
+                            {% if app.request.request.get('priority', rule.priority.value) == prio %}selected{% endif %}>
+                            {{ prio|capitalize }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="form-field">
+                <span>Category Scope</span>
+                <select id="category_id" name="category_id" class="input">
+                    <option value="">-- Global (Applies to all categories) --</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}"
+                            {% if app.request.request.get('category_id', rule.category ? rule.category.id : '') == cat.id %}selected{% endif %}>
+                            {{ cat.name }} ({{ cat.code }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <small class="muted">Category-specific rules take precedence over global rules.</small>
+            </label>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <label class="form-field">
+                <span>First Response (mins) *</span>
+                <input type="number" id="response_minutes" name="response_minutes" class="input" min="1" required
+                       value="{{ app.request.request.get('response_minutes', rule.responseMinutes) }}">
+                <small class="muted">e.g. 60 (1 hr), 240 (4 hrs)</small>
+            </label>
+
+            <label class="form-field">
+                <span>Resolution Target (mins) *</span>
+                <input type="number" id="resolution_minutes" name="resolution_minutes" class="input" min="1" required
+                       value="{{ app.request.request.get('resolution_minutes', rule.resolutionMinutes) }}">
+                <small class="muted">e.g. 1440 (24 hrs), 2880 (48 hrs)</small>
+            </label>
+
+            <label class="form-field">
+                <span>Escalation Window (mins) *</span>
+                <input type="number" id="escalation_minutes" name="escalation_minutes" class="input" min="1" required
+                       value="{{ app.request.request.get('escalation_minutes', rule.escalationMinutes) }}">
+                <small class="muted">Time before SLA escalation triggers</small>
+            </label>
+        </div>
+
+        <label class="checkbox-field" style="margin-top: var(--sp-2);">
+            <input type="checkbox" name="active" value="1"
+                   {% if app.request.request.get('active', rule.active) %}checked{% endif %}>
+            <span>Active (evaluated when evaluating tickets)</span>
+        </label>
+
+        <div class="form-actions" style="margin-top: var(--sp-4);">
+            <button type="submit" class="button button--primary">
+                {{ mode == 'new' ? 'Create SLA Rule' : 'Save Changes' }}
+            </button>
+            <a href="{{ path('admin_sla_index') }}" class="button button--secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Branch Performance | {{ app_name }}{% endblock %}
+{% block page_heading %}Branch performance{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Operational comparison</p>
+                <h2>Branch activity and ticket pressure</h2>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Branch</th>
+                        <th>Total</th>
+                        <th>Open</th>
+                        <th>In progress</th>
+                        <th>Waiting</th>
+                        <th>Resolved</th>
+                        <th>Closed</th>
+                        <th>Reopened</th>
+                        <th>Overdue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td><strong>{{ row.branch }}</strong></td>
+                        <td>{{ row.total }}</td>
+                        <td>{{ row.open }}</td>
+                        <td>{{ row.in_progress }}</td>
+                        <td>{{ row.waiting }}</td>
+                        <td>{{ row.resolved }}</td>
+                        <td>{{ row.closed }}</td>
+                        <td>{{ row.reopened }}</td>
+                        <td>{{ row.overdue }}</td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 9, title: 'No branch data yet', message: 'Branch trends will appear after member tickets are mapped to a branch.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

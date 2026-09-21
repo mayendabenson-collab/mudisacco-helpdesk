@@ -1,0 +1,11 @@
+member_number,display_name,primary_phone,email,status,branch_code
+MUDI-001,John Kariuki,+254700000001,john.kariuki@example.com,active,BLANTYRE_MAIN
+MUDI-002,Jane Mwangi,+254700000002,jane.mwangi@example.com,active,LILONGWE_KANENGO
+MUDI-003,Robert Otieno,+254700000003,robert.otieno@example.com,active,MZUZU
+MUDI-004,Alice Njuguna,+254700000004,alice.njuguna@example.com,active,ZOMBA
+MUDI-005,David Musyoka,+254700000005,david.musyoka@example.com,active,KASINTHULA_CHIKWAWA
+MUDI-006,Margaret Simiyu,+254700000006,margaret.simiyu@example.com,active,NSANJE
+MUDI-007,Peter Kipchoge,+254700000007,peter.kipchoge@example.com,active,MULANJE_SATELLITE
+MUDI-008,Catherine Wanjiru,+254700000008,catherine.wanjiru@example.com,active,BLANTYRE_MAIN
+MUDI-009,Samuel Kiplagat,+254700000009,samuel.kiplagat@example.com,active,LILONGWE_KANENGO
+MUDI-010,Victoria Omondi,+254700000010,victoria.omondi@example.com,active,MZUZU

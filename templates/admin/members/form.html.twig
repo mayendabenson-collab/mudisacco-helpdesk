@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if mode == 'new' %}Add Member{% else %}Edit Member{% endif %} | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}{% if mode == 'new' %}Add New Member{% else %}Edit Member{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_members_index'), label: 'Back to members', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section" style="max-width: 760px;">
+    <p class="section-kicker">Member registry</p>
+    <h2>{% if mode == 'new' %}Register new SACCO member{% else %}Update member details{% endif %}</h2>
+
+    {% if errors %}
+        <div class="alert alert--error" style="margin-bottom: var(--sp-4);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin: 4px 0 0 16px; padding: 0;">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="POST" class="stack-form">
+        <input type="hidden" name="_token" value="{% if mode == 'new' %}{{ csrf_token('member_create') }}{% else %}{{ csrf_token('member_edit_' ~ member.id.toRfc4122()) }}{% endif %}">
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span>Member Number *</span>
+                <input 
+                    type="text" 
+                    id="memberNumber" 
+                    name="member_number" 
+                    class="input" 
+                    value="{{ member.memberNumber }}"
+                    {% if mode != 'new' %}disabled{% endif %}
+                    placeholder="e.g., MUDI-001"
+                    required>
+                <small class="muted">Unique SACCO identification number</small>
+            </label>
+
+            <label class="form-field">
+                <span>Full Display Name *</span>
+                <input 
+                    type="text" 
+                    id="displayName" 
+                    name="display_name" 
+                    class="input" 
+                    value="{{ member.displayName }}"
+                    placeholder="e.g., Alice Moyo"
+                    required>
+            </label>
+        </div>
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span>Email Address</span>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="input" 
+                    value="{{ member.email }}"
+                    placeholder="alice@example.com">
+            </label>
+
+            <label class="form-field">
+                <span>Primary Phone Number</span>
+                <input 
+                    type="tel" 
+                    id="primaryPhone" 
+                    name="primary_phone" 
+                    class="input" 
+                    value="{{ member.primaryPhone }}"
+                    placeholder="+265 99 123 4567">
+            </label>
+        </div>
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span>Status *</span>
+                <select id="status" name="status" class="input" required>
+                    {% for status_option in statuses %}
+                        <option value="{{ status_option.value }}" {% if member.status == status_option %}selected{% endif %}>
+                            {{ status_option.value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="form-field">
+                <span>Assigned Branch / Location</span>
+                <select id="branchId" name="branch_id" class="input">
+                    <option value="">— No Branch —</option>
+                    {% for branch in branches %}
+                        <option value="{{ branch.id }}" {% if member.branch and member.branch.id == branch.id %}selected{% endif %}>
+                            {{ branch.name }} ({{ branch.code }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="form-actions" style="margin-top: var(--sp-4);">
+            <button type="submit" class="button button--primary">
+                {% if mode == 'new' %}
+                    Create Member
+                {% else %}
+                    Update Member
+                {% endif %}
+            </button>
+            <a href="{{ path('admin_members_index') }}" class="button button--secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+
+{% if mode != 'new' and member.user %}
+    <section class="page-section panel-section" style="max-width: 760px; margin-top: var(--sp-5);">
+        <p class="section-kicker">Linked Portal Account</p>
+        <h2>Self-Service Access</h2>
+        <dl class="detail-list">
+            <div>
+                <dt>Login Email</dt>
+                <dd>{{ member.user.email }}</dd>
+            </div>
+            <div>
+                <dt>Account Status</dt>
+                <dd>
+                    <span class="badge badge--{{ member.user.active ? 'success' : 'danger' }}">
+                        <span class="sdot sdot--{{ member.user.active ? 'success' : 'danger' }}"></span>
+                        {{ member.user.active ? 'Active' : 'Inactive' }}
+                    </span>
+                </dd>
+            </div>
+        </dl>
+    </section>
+{% endif %}
+{% endblock %}
