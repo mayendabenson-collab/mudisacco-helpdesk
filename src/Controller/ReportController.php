@@ -28,11 +28,22 @@ class ReportController extends AbstractController
         $departmentRows = $this->departmentRows($entityManager, $user);
         $branchRows = $this->branchRows($entityManager, $user);
         $slaRows = $this->slaRows($entityManager, $user);
+        $overviewSummary = [
+            'total' => array_sum(array_map(static fn (array $row): int => (int) $row['total'], $departmentRows)),
+            'open' => array_sum(array_map(static fn (array $row): int => (int) $row['open'], $departmentRows)),
+            'active' => array_sum(array_map(static fn (array $row): int => (int) $row['in_progress'] + (int) $row['waiting'], $departmentRows)),
+            'overdue' => array_sum(array_map(static fn (array $row): int => (int) $row['overdue'], $departmentRows)),
+            'breached' => $this->countSlaStatus($slaRows, 'BREACHED'),
+            'escalated' => $this->countSlaStatus($slaRows, 'ESCALATED'),
+            'top_department' => $departmentRows[0] ?? null,
+            'top_branch' => $branchRows[0] ?? null,
+        ];
 
         return $this->render('reports/index.html.twig', [
             'departmentRows' => $departmentRows,
             'branchRows' => $branchRows,
             'slaRows' => $slaRows,
+            'overviewSummary' => $overviewSummary,
         ]);
     }
 
