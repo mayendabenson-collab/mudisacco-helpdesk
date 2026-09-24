@@ -1,10 +1,10 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
-        app_name: '%env(default:NZERU Help Desk:APP_NAME)%'
-        app_short_name: '%env(default:NZERU:APP_SHORT_NAME)%'
-        app_tagline: '%env(default:Help Desk:APP_TAGLINE)%'
-        app_logo_path: '%env(default:assets/styles/logonzeru.jpeg:APP_LOGO_PATH)%'
+        app_name: '%env(resolve:APP_NAME)%'
+        app_short_name: '%env(resolve:APP_SHORT_NAME)%'
+        app_tagline: '%env(resolve:APP_TAGLINE)%'
+        app_logo_path: '%env(resolve:APP_LOGO_PATH)%'
 
 when@test:
     twig:
