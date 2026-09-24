@@ -11,6 +11,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HealthController extends AbstractController
 {
+    #[Route('/health', name: 'health', methods: ['GET'])]
+    #[Route('/health/', name: 'health_slash', methods: ['GET'])]
     #[Route('/api/health', name: 'api_health', methods: ['GET'])]
     public function __invoke(Connection $connection): JsonResponse
     {

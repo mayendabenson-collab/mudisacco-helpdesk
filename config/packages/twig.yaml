@@ -1,7 +1,10 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
-        app_name: 'Mudi SACCO Support'
+        app_name: '%env(default:NZERU Help Desk:APP_NAME)%'
+        app_short_name: '%env(default:NZERU:APP_SHORT_NAME)%'
+        app_tagline: '%env(default:Help Desk:APP_TAGLINE)%'
+        app_logo_path: '%env(default:assets/styles/logonzeru.jpeg:APP_LOGO_PATH)%'
 
 when@test:
     twig:

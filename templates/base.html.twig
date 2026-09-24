@@ -10,10 +10,14 @@
     <div class="app-shell">
         <aside class="sidebar" aria-label="Primary navigation">
             <a class="brand" href="{{ path('app_dashboard') }}">
-                <span class="brand-mark">M</span>
+                {% if app_logo_path is defined and app_logo_path %}
+                    <img src="{{ asset(app_logo_path) }}" alt="{{ app_short_name|default(app_name) }} logo" class="brand-logo">
+                {% else %}
+                    <span class="brand-mark">{{ app_short_name|default('NZ')|slice(0, 1)|upper }}</span>
+                {% endif %}
                 <span>
-                    <strong>Mudi SACCO</strong>
-                    <small>Service Desk</small>
+                    <strong>{{ app_short_name|default(app_name) }}</strong>
+                    <small>{{ app_tagline|default('Help Desk') }}</small>
                 </span>
             </a>
 
