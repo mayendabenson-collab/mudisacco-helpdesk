@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications | {{ app_name }}{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Notification</th>
+                        <th>Channel</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for notification in notifications %}
+                    <tr>
+                        <td><strong>{{ notification.subject }}</strong><br><span class="muted">{{ notification.body }}</span></td>
+                        <td>{{ notification.channel.value|replace({'_': ' '})|title }}</td>
+                        <td>{{ notification.createdAt|date('M j, Y H:i') }}</td>
+                        <td>{% include 'components/_badge.html.twig' with { label: notification.readAt ? 'Read' : 'Unread', tone: notification.readAt ? 'neutral' : 'warning' } only %}</td>
+                        <td>
+                            {% if not notification.readAt %}
+                                <form method="post" action="{{ path('notification_mark_read', { id: notification.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('notification_read_' ~ notification.id) }}">
+                                    <button class="button button--secondary button--small" type="submit">Mark read</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 5, title: 'No notifications', message: 'Ticket updates and account security events will appear here.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

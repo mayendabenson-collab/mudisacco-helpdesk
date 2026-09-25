@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Verify Member | {{ app_name }}{% endblock %}
+{% block page_heading %}Verify Member{% endblock %}
+
+{% block body %}
+    <section class="auth-layout">
+        <form class="auth-form" method="post" action="{{ path('member_register_verify') }}">
+            <div>
+                <p class="section-kicker">{{ member.memberNumber }}</p>
+                <h2>Create your portal password</h2>
+            </div>
+            {% if errors is not empty %}
+                <div class="alert alert--error">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
+            {% endif %}
+            <input type="hidden" name="_token" value="{{ csrf_token('member_register_verify') }}">
+            {% include 'components/_form_field.html.twig' with { label: 'Verification code', name: 'otp', required: true } only %}
+            {% include 'components/_form_field.html.twig' with { label: 'Password', name: 'password', type: 'password', required: true } only %}
+            {% include 'components/_form_field.html.twig' with { label: 'Confirm password', name: 'confirm_password', type: 'password', required: true } only %}
+            <button class="button button--primary" type="submit">Create account</button>
+        </form>
+    </section>
+{% endblock %}

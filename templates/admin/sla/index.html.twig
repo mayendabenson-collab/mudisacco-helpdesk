@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SLA Rules | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}SLA Targets & Rules{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_sla_new'), label: '+ New SLA Rule', variant: 'primary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section">
+    <div class="section-header">
+        <div>
+            <p class="section-kicker">Compliance</p>
+            <h2>Active SLA Policies</h2>
+            <p class="muted" style="margin-top: 4px; font-size: 13px;">SLA rules define target response and resolution time windows based on ticket priority and category.</p>
+        </div>
+        <span class="badge badge--neutral">{{ rules|length }} Policies</span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>
+                        <span class="th-icon">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </span>
+                        Priority
+                    </th>
+                    <th>Scope / Category</th>
+                    <th>First Response Target</th>
+                    <th>Resolution Target</th>
+                    <th>Escalation Window</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rule in rules %}
+                    {% set isUrgent = rule.priority.value in ['URGENT', 'HIGH', 'critical', 'high'] %}
+                    <tr>
+                        <td>
+                            <span class="badge badge--{{ isUrgent ? 'danger' : 'neutral' }}">
+                                <span class="sdot sdot--{{ isUrgent ? 'danger' : 'neutral' }}"></span>
+                                {{ rule.priority.value|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if rule.category %}
+                                <strong>{{ rule.category.name }}</strong>
+                                <div class="muted" style="font-size:12px;"><code>{{ rule.category.code }}</code></div>
+                            {% else %}
+                                <span class="muted">Global (All Categories)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rule.responseMinutes >= 60 %}
+                                <strong>{{ (rule.responseMinutes / 60)|round(1) }}</strong> <span class="muted">hrs</span>
+                            {% else %}
+                                <strong>{{ rule.responseMinutes }}</strong> <span class="muted">mins</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rule.resolutionMinutes >= 1440 %}
+                                <strong>{{ (rule.resolutionMinutes / 1440)|round(1) }}</strong> <span class="muted">days</span>
+                            {% elseif rule.resolutionMinutes >= 60 %}
+                                <strong>{{ (rule.resolutionMinutes / 60)|round(1) }}</strong> <span class="muted">hrs</span>
+                            {% else %}
+                                <strong>{{ rule.resolutionMinutes }}</strong> <span class="muted">mins</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rule.escalationMinutes >= 60 %}
+                                <strong>{{ (rule.escalationMinutes / 60)|round(1) }}</strong> <span class="muted">hrs</span>
+                            {% else %}
+                                <strong>{{ rule.escalationMinutes }}</strong> <span class="muted">mins</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rule.active %}
+                                <span class="badge badge--success">
+                                    <span class="sdot sdot--success"></span>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="badge badge--neutral">
+                                    <span class="sdot sdot--neutral"></span>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right;">
+                            <a href="{{ path('admin_sla_edit', { id: rule.id }) }}" class="button button--secondary button--sm">Edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 7, title: 'No custom SLA rules', message: 'Default fallback targets are active. Add custom SLA rules to override defaults.' } only %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

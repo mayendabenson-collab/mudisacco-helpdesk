@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Management Summary | {{ app_name }}{% endblock %}
+{% block page_heading %}Management summary{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Leadership view</p>
+                <h2>Operational summary</h2>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-card__label">Total tickets</span><strong class="stat-card__value">{{ summary.total_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Open</span><strong class="stat-card__value">{{ summary.open_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">In progress</span><strong class="stat-card__value">{{ summary.in_progress_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Waiting</span><strong class="stat-card__value">{{ summary.waiting_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Resolved</span><strong class="stat-card__value">{{ summary.resolved_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Closed</span><strong class="stat-card__value">{{ summary.closed_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Reopened</span><strong class="stat-card__value">{{ summary.reopened_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Overdue</span><strong class="stat-card__value">{{ summary.overdue_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Escalated</span><strong class="stat-card__value">{{ summary.escalated_tickets }}</strong></div>
+            <div class="stat-card"><span class="stat-card__label">Breached SLA</span><strong class="stat-card__value">{{ summary.breached_tickets }}</strong></div>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Top departments</p>
+                <h2>Highest ticket load</h2>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead><tr><th>Department</th><th>Total</th><th>Open</th><th>Overdue</th></tr></thead>
+                <tbody>
+                {% for row in topDepartments %}
+                    <tr><td><strong>{{ row.department }}</strong></td><td>{{ row.total }}</td><td>{{ row.open }}</td><td>{{ row.overdue }}</td></tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 4, title: 'No department activity yet', message: 'Department load will appear once tickets are created.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Top branches</p>
+                <h2>Branch volume</h2>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead><tr><th>Branch</th><th>Total</th><th>Open</th><th>Overdue</th></tr></thead>
+                <tbody>
+                {% for row in topBranches %}
+                    <tr><td><strong>{{ row.branch }}</strong></td><td>{{ row.total }}</td><td>{{ row.open }}</td><td>{{ row.overdue }}</td></tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 4, title: 'No branch activity yet', message: 'Branch volume will appear once tickets are mapped to branches.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

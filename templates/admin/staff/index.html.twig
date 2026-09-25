@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Staff Management | {{ app_name }}{% endblock %}
+{% block page_heading %}Staff Management{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_staff_new'), label: 'Create employee', variant: 'primary' } only %}
+{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Administration</p>
+                <h2>Employees and departments</h2>
+            </div>
+        </div>
+
+        <div class="info-callout" style="margin-bottom: var(--sp-5)">
+            <div class="info-callout__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <div>
+                <strong style="font-size:13px">Employee types &amp; responsibilities</strong>
+                <div class="info-callout__grid">
+                    <div class="info-callout__item">
+                        <strong>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Staff
+                        </strong>
+                        <small>Answers member calls, creates and resolves tickets</small>
+                    </div>
+                    <div class="info-callout__item">
+                        <strong>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                            Supervisor
+                        </strong>
+                        <small>Manages team, oversees full department queue, handles escalations</small>
+                    </div>
+                    <div class="info-callout__item">
+                        <strong>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+                            Administrator
+                        </strong>
+                        <small>System configuration, user management, and full system access</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for employee in employees %}
+                    {% set employeeRoles = [] %}
+                    {% for role in employee.roles %}
+                        {% if role != 'ROLE_USER' %}
+                            {% set employeeRoles = employeeRoles|merge([role|replace({'ROLE_': ''})|title]) %}
+                        {% endif %}
+                    {% endfor %}
+                    <tr>
+                        <td>
+                            <a class="table-link" href="{{ path('admin_staff_edit', { id: employee.id }) }}">{{ employee.fullName }}</a><br>
+                            <span class="muted">{{ employee.email }}</span>
+                        </td>
+                        <td>{{ employeeRoles|join(', ') }}</td>
+                        <td>{{ employee.department ? employee.department.name : 'Not assigned' }}</td>
+                        <td>{% include 'components/_badge.html.twig' with { label: employee.active ? 'Active' : 'Inactive', tone: employee.active ? 'success' : 'neutral' } only %}</td>
+                        <td>{{ employee.createdAt|date('M j, Y') }}</td>
+                        <td>
+                            <div class="row-actions">
+                                <a class="button button--secondary button--small" href="{{ path('admin_staff_edit', { id: employee.id }) }}">Edit</a>
+                                {% if app.user and employee.id.toRfc4122 != app.user.id.toRfc4122 %}
+                                    <form method="post" action="{{ path('admin_staff_toggle_active', { id: employee.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('staff_toggle_' ~ employee.id) }}">
+                                        <button class="button button--secondary button--small" type="submit">{{ employee.active ? 'Deactivate' : 'Activate' }}</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{{ path('admin_staff_reset_password', { id: employee.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('staff_reset_' ~ employee.id) }}">
+                                    <button class="button button--secondary button--small" type="submit">Reset password</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 6, title: 'No employees', message: 'Create the first staff account to begin routing tickets.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

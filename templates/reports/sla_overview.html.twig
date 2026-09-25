@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SLA Overview | {{ app_name }}{% endblock %}
+{% block page_heading %}SLA overview{% endblock %}
+
+{% block body %}
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Service level monitoring</p>
+                <h2>Ticket SLA status count</h2>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Tickets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td><strong>{{ row.label }}</strong></td>
+                        <td>{{ row.count }}</td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 2, title: 'No SLA data yet', message: 'SLA status counts will appear once tickets are created and tracked.' } only %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ticket Categories | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}Ticket Categories{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_category_new'), label: '+ New Category', variant: 'primary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section">
+    <div class="section-header">
+        <div>
+            <p class="section-kicker">Classification</p>
+            <h2>All Categories</h2>
+            <p class="muted" style="margin-top: 4px; font-size: 13px;">Categories classify member issues, route tickets to departments, and define SLA targets.</p>
+        </div>
+        <span class="badge badge--neutral">{{ categories|length }} Categories</span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>
+                        <span class="th-icon">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        </span>
+                        Code
+                    </th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Default Priority</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td><code>{{ category.code }}</code></td>
+                        <td>
+                            <strong>{{ category.name }}</strong>
+                            {% if category.description %}
+                                <div class="muted" style="font-size:12px;">{{ category.description }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="muted">{{ category.department.name }}</span></td>
+                        <td>
+                            {% set isUrgent = category.defaultPriority.value in ['URGENT', 'HIGH'] %}
+                            <span class="badge badge--{{ isUrgent ? 'danger' : 'neutral' }}">
+                                <span class="sdot sdot--{{ isUrgent ? 'danger' : 'neutral' }}"></span>
+                                {{ category.defaultPriority.value|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if category.active %}
+                                <span class="badge badge--success">
+                                    <span class="sdot sdot--success"></span>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="badge badge--neutral">
+                                    <span class="sdot sdot--neutral"></span>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right;">
+                            <a href="{{ path('admin_category_edit', { id: category.id }) }}" class="button button--secondary button--sm">Edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    {% include 'components/_table_empty.html.twig' with { colspan: 6, title: 'No categories found', message: 'Add your first ticket category to get started.' } only %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Customer Ticket | {{ app_name }}{% endblock %}
+{% block page_heading %}Customer Service Desk — Create Ticket{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('ticket_index'), label: 'Back to queue', variant: 'secondary' } only %}
+{% endblock %}
+
+{% block body %}
+    <section class="form-panel" style="max-width: 960px;">
+        {% if errors is not empty %}
+            <div class="alert alert--error" style="margin-bottom: var(--space-4);">
+                {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- STEP 1: CUSTOMER IDENTIFICATION -->
+        <div class="panel-section" style="margin-bottom: var(--space-5); padding: var(--space-4); background: #ffffff; border: 1px solid var(--color-line); border-radius: var(--radius-md);">
+            <div class="section-header" style="margin-bottom: var(--space-3);">
+                <div>
+                    <p class="section-kicker" style="margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--color-accent);">Step 1: Customer Identification</p>
+                    <h2 style="margin: var(--space-1) 0 0 0; font-size: 18px;">Select Existing Mudi SACCO Member</h2>
+                </div>
+            </div>
+
+            <!-- Customer Search Field -->
+            <div id="member-search-box" style="{% if selectedMember %}display: none;{% endif %}">
+                <p class="muted" style="margin: 0 0 var(--space-2) 0; font-size: 13px;">
+                    Search member by Member Number, Full Name, Phone Number, or Email address:
+                </p>
+                <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-3);">
+                    <input type="text" id="member-search-input" class="input" placeholder="e.g. MUDI-000123, Daniel Mwangi, +254..." style="flex: 1;" autocomplete="off">
+                    <button type="button" id="member-search-btn" class="button button--secondary">Search Customer</button>
+                </div>
+
+                <!-- Live Results Container -->
+                <div id="member-search-results" style="display: none; border: 1px solid var(--color-line); border-radius: var(--radius-md); padding: var(--space-3); background: var(--color-page);">
+                    <p style="margin: 0 0 var(--space-2) 0; font-size: 12px; font-weight: 600; color: var(--color-muted);">Search Results:</p>
+                    <div id="member-results-list" style="display: flex; flex-direction: column; gap: var(--space-2);"></div>
+                </div>
+
+                <!-- Not Found Notice -->
+                <div id="member-not-found" style="display: none; margin-top: var(--space-2);" class="alert alert--warning">
+                    Member not found. Please verify the member details or contact an administrator.
+                </div>
+            </div>
+
+            <!-- Selected Member Card -->
+            <div id="selected-member-card" style="{% if not selectedMember %}display: none;{% endif %} padding: var(--space-3); background: #eaf5f0; border: 1px solid #b7dfd0; border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3);">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1);">
+                            <span class="badge" style="background: var(--color-accent); color: #fff; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-sm); font-size: 11px;">SELECTED CUSTOMER</span>
+                            <strong id="selected-member-name" style="font-size: 16px;">{{ selectedMember ? selectedMember.displayName : '' }}</strong>
+                        </div>
+                        <div style="font-size: 13px; color: var(--color-ink); display: flex; flex-wrap: wrap; gap: var(--space-3);">
+                            <span><strong>Member #:</strong> <span id="selected-member-number">{{ selectedMember ? selectedMember.memberNumber : '' }}</span></span>
+                            <span><strong>Phone:</strong> <span id="selected-member-phone">{{ selectedMember ? (selectedMember.primaryPhone ?? 'N/A') : '' }}</span></span>
+                            <span><strong>Email:</strong> <span id="selected-member-email">{{ selectedMember ? (selectedMember.email ?? 'N/A') : '' }}</span></span>
+                            <span><strong>Home Branch:</strong> <span id="selected-member-branch">{{ selectedMember and selectedMember.branch ? selectedMember.branch.name : 'Not set' }}</span></span>
+                        </div>
+                    </div>
+                    <button type="button" id="change-member-btn" class="button button--secondary" style="font-size: 12px; padding: 4px 10px;">Change Member</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 & 3: TICKET INTAKE FORM -->
+        <form class="stack-form" method="post" action="{{ path('ticket_new') }}" enctype="multipart/form-data" id="ticket-create-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('ticket_create') }}">
+            <input type="hidden" name="member_id" id="form-member-id" value="{{ selectedMember ? selectedMember.id : '' }}" required>
+
+            {# For phone-first workflow we use a hidden branch and channel field; branch will be set from selected member when available #}
+            <input type="hidden" name="branch" id="ticket-branch" value="{{ selectedMember ? selectedMember.branch ? selectedMember.branch.id : '' : '' }}">
+            <input type="hidden" name="channel" id="ticket-channel" value="{{ app.request.request.get('channel', 'PHONE') }}">
+
+            <label class="form-field">
+                <span>Category <small style="color: var(--color-danger);">*</small></span>
+                <select class="input" name="category" id="ticket-category" required>
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" data-priority="{{ category.defaultPriority.value }}" {% if app.request.request.get('category') == category.id %} selected{% endif %}>
+                            {{ category.name }} · {{ category.department.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <small class="muted" id="category-dept-hint">Assigned department & default priority will be applied.</small>
+            </label>
+
+            <label class="form-field">
+                <span>Priority <small style="color: var(--color-danger);">*</small></span>
+                <select class="input" name="priority" id="ticket-priority" required>
+                    {% for priority in priorities %}
+                        <option value="{{ priority.value }}"{% if app.request.request.get('priority') == priority.value %} selected{% endif %}>{{ priority.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <!-- Subject -->
+            <label class="form-field">
+                <span>Subject / Issue Summary <small style="color: var(--color-danger);">*</small></span>
+                <input class="input" name="subject" maxlength="180" required value="{{ app.request.request.get('subject') }}" placeholder="Brief summary of member's enquiry or complaint">
+            </label>
+
+            <!-- Detailed Description -->
+            <label class="form-field">
+                <span>Detailed Description <small style="color: var(--color-danger);">*</small></span>
+                <textarea class="input textarea" name="description" rows="6" required placeholder="Detailed notes on the customer's request, inquiry, or complaint as conveyed to staff...">{{ app.request.request.get('description') }}</textarea>
+            </label>
+
+            {# Attachment omitted in phone-first quick flow to keep form minimal; staff can add attachments from ticket view if needed #}
+
+            <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-4);">
+                <a href="{{ path('ticket_index') }}" class="button button--secondary">Cancel</a>
+                <button class="button button--primary" type="submit" id="create-ticket-submit-btn">Create Customer Ticket</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Interactive Client Script for Customer Search and Category Auto-Selection -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('member-search-input');
+            const searchBtn = document.getElementById('member-search-btn');
+            const resultsContainer = document.getElementById('member-search-results');
+            const resultsList = document.getElementById('member-results-list');
+            const notFoundNotice = document.getElementById('member-not-found');
+            const searchBox = document.getElementById('member-search-box');
+            const selectedCard = document.getElementById('selected-member-card');
+            const changeMemberBtn = document.getElementById('change-member-btn');
+            const memberIdInput = document.getElementById('form-member-id');
+
+            const nameSpan = document.getElementById('selected-member-name');
+            const numberSpan = document.getElementById('selected-member-number');
+            const phoneSpan = document.getElementById('selected-member-phone');
+            const emailSpan = document.getElementById('selected-member-email');
+            const branchSpan = document.getElementById('selected-member-branch');
+            const branchSelect = document.getElementById('ticket-branch');
+
+            const categorySelect = document.getElementById('ticket-category');
+            const prioritySelect = document.getElementById('ticket-priority');
+            const categoryDeptHint = document.getElementById('category-dept-hint');
+
+            // Category change auto-sets default priority and displays department
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function () {
+                    const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+                    if (selectedOption && selectedOption.dataset.priority) {
+                        prioritySelect.value = selectedOption.dataset.priority;
+                        categoryDeptHint.textContent = 'Assigned Department: ' + selectedOption.dataset.department;
+                    }
+                });
+            }
+
+            // Customer Search Action
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (query.length < 2) {
+                    return;
+                }
+
+                searchBtn.disabled = true;
+                searchBtn.textContent = 'Searching...';
+                notFoundNotice.style.display = 'none';
+
+                fetch('{{ path("ticket_search_members") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => {
+                        searchBtn.disabled = false;
+                        searchBtn.textContent = 'Search Customer';
+                        resultsList.innerHTML = '';
+
+                        if (data.members && data.members.length > 0) {
+                            data.members.forEach(member => {
+                                const row = document.createElement('div');
+                                row.style.display = 'flex';
+                                row.style.justifyContent = 'space-between';
+                                row.style.alignItems = 'center';
+                                row.style.padding = '8px 12px';
+                                row.style.background = '#ffffff';
+                                row.style.border = '1px solid var(--color-line)';
+                                row.style.borderRadius = 'var(--radius-sm)';
+
+                                row.innerHTML = `
+                                    <div>
+                                        <strong>${member.displayName}</strong> (${member.memberNumber})
+                                        <div style="font-size: 12px; color: var(--color-muted);">
+                                            Phone: ${member.phone} · Email: ${member.email} · Branch: ${member.branch}
+                                        </div>
+                                    </div>
+                                    <button type="button" class="button button--secondary select-member-btn" style="padding: 4px 10px; font-size: 12px;">Select</button>
+                                `;
+
+                                row.querySelector('.select-member-btn').addEventListener('click', function () {
+                                    selectMember(member);
+                                });
+
+                                resultsList.appendChild(row);
+                            });
+                            resultsContainer.style.display = 'block';
+                            notFoundNotice.style.display = 'none';
+                        } else {
+                            resultsContainer.style.display = 'none';
+                            notFoundNotice.style.display = 'block';
+                        }
+                    })
+                    .catch(err => {
+                        searchBtn.disabled = false;
+                        searchBtn.textContent = 'Search Customer';
+                        console.error('Member search error:', err);
+                    });
+            }
+
+            function selectMember(member) {
+                memberIdInput.value = member.id;
+                nameSpan.textContent = member.displayName;
+                numberSpan.textContent = member.memberNumber;
+                phoneSpan.textContent = member.phone;
+                emailSpan.textContent = member.email;
+                branchSpan.textContent = member.branch;
+
+                // If member has home branch, pre-select it if branch is not yet selected
+                if (member.branchId && branchSelect && !branchSelect.value) {
+                    branchSelect.value = member.branchId;
+                }
+
+                resultsContainer.style.display = 'none';
+                searchBox.style.display = 'none';
+                selectedCard.style.display = 'block';
+            }
+
+            if (searchBtn) {
+                searchBtn.addEventListener('click', performSearch);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            }
+
+            if (changeMemberBtn) {
+                changeMemberBtn.addEventListener('click', function () {
+                    memberIdInput.value = '';
+                    selectedCard.style.display = 'none';
+                    searchBox.style.display = 'block';
+                    searchInput.focus();
+                });
+            }
+
+            // Form validation before submit
+            const form = document.getElementById('ticket-create-form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (!memberIdInput.value) {
+                        e.preventDefault();
+                        alert('Please search and select an existing member before creating a ticket.');
+                        searchInput.focus();
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

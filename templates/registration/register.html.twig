@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Member Registration | {{ app_name }}{% endblock %}
+{% block page_heading %}Member Registration{% endblock %}
+
+{% block body %}
+    <section class="auth-layout">
+        <form class="auth-form" method="post" action="{{ path('member_register') }}">
+            <div>
+                <p class="section-kicker">Member verification</p>
+                <h2>Verify your SACCO member record</h2>
+            </div>
+            {% if errors is not empty %}
+                <div class="alert alert--error">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
+            {% endif %}
+            <input type="hidden" name="_token" value="{{ csrf_token('member_register') }}">
+            {% include 'components/_form_field.html.twig' with { label: 'Member number', name: 'member_number', required: true } only %}
+            {% include 'components/_form_field.html.twig' with { label: 'Registered email or phone', name: 'contact', required: true } only %}
+            <button class="button button--primary" type="submit">Continue</button>
+        </form>
+    </section>
+{% endblock %}

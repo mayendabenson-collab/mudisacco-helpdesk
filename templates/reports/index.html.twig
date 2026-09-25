@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports | {{ app_name }}{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+
+{% block body %}
+    <section class="report-hero">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Operations overview</p>
+                <h2>Know where attention is needed</h2>
+                <p class="report-hero__intro">A quick read of the current ticket workload, service risk, and the reports available to your team.</p>
+            </div>
+            <a class="button button--primary" href="{{ path('report_management_summary') }}">Open management summary</a>
+        </div>
+
+        <div class="report-kpi-grid">
+            <div class="report-kpi"><span>Total tickets</span><strong>{{ overviewSummary.total }}</strong><small>Across all visible departments</small></div>
+            <div class="report-kpi"><span>Open queue</span><strong>{{ overviewSummary.open }}</strong><small>Waiting to be picked up</small></div>
+            <div class="report-kpi"><span>Active work</span><strong>{{ overviewSummary.active }}</strong><small>In progress or waiting</small></div>
+            <div class="report-kpi report-kpi--risk"><span>At risk</span><strong>{{ overviewSummary.overdue + overviewSummary.breached + overviewSummary.escalated }}</strong><small>{{ overviewSummary.overdue }} overdue &middot; {{ overviewSummary.breached }} breached &middot; {{ overviewSummary.escalated }} escalated</small></div>
+        </div>
+    </section>
+
+    <section class="report-layout">
+        <div class="report-panel">
+            <div class="section-header section-header--compact">
+                <div>
+                    <p class="section-kicker">Attention first</p>
+                    <h2>Current pressure points</h2>
+                </div>
+                <a class="table-link" href="{{ path('report_management_summary') }}">View full summary</a>
+            </div>
+            <div class="report-focus-list">
+                <div class="report-focus-row"><span class="report-focus-icon report-focus-icon--danger">!</span><div><strong>{{ overviewSummary.overdue }} overdue tickets</strong><small>Work outside the expected resolution window</small></div><a class="table-link" href="{{ path('report_sla_overview') }}">Review SLA</a></div>
+                <div class="report-focus-row"><span class="report-focus-icon report-focus-icon--warning">&#8599;</span><div><strong>{{ overviewSummary.escalated }} escalated tickets</strong><small>Cases requiring supervisor attention</small></div><a class="table-link" href="{{ path('report_sla_overview') }}">Review SLA</a></div>
+                <div class="report-focus-row"><span class="report-focus-icon report-focus-icon--info">&#9679;</span><div><strong>{{ overviewSummary.top_department ? overviewSummary.top_department.department : 'No department activity' }}</strong><small>{{ overviewSummary.top_department ? overviewSummary.top_department.total ~ ' tickets, highest department load' : 'Department load will appear here' }}</small></div><a class="table-link" href="{{ path('report_department_performance') }}">Compare</a></div>
+            </div>
+        </div>
+
+        <div class="report-panel report-panel--spotlight">
+            <p class="section-kicker">Largest branch workload</p>
+            {% if overviewSummary.top_branch %}
+                <strong class="report-spotlight__value">{{ overviewSummary.top_branch.total }}</strong>
+                <h2>{{ overviewSummary.top_branch.branch }}</h2>
+                <p>{{ overviewSummary.top_branch.open }} open &middot; {{ overviewSummary.top_branch.overdue }} overdue</p>
+            {% else %}
+                <h2>No branch activity yet</h2>
+                <p>Branch volume will appear once tickets are mapped.</p>
+            {% endif %}
+            <a class="button button--secondary" href="{{ path('report_branch_performance') }}">Compare branches</a>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <div class="section-header">
+            <div>
+                <p class="section-kicker">Report library</p>
+                <h2>Choose a view</h2>
+            </div>
+        </div>
+
+        <div class="report-library">
+            <a class="report-library__item" href="{{ path('report_department_performance') }}"><span><strong>Department performance</strong><small>Find workload and overdue tickets by team</small></span><b>&rarr;</b></a>
+            <a class="report-library__item" href="{{ path('report_branch_performance') }}"><span><strong>Branch performance</strong><small>Compare volume and operational health</small></span><b>&rarr;</b></a>
+            <a class="report-library__item" href="{{ path('report_sla_overview') }}"><span><strong>SLA overview</strong><small>See due soon, breached, and escalated work</small></span><b>&rarr;</b></a>
+        </div>
+
+        <div class="export-strip"><span><strong>Need the data elsewhere?</strong> Download the latest tables as CSV.</span><div class="row-actions"><a class="button button--secondary" href="{{ path('report_department_performance_csv') }}">Department CSV</a><a class="button button--secondary" href="{{ path('report_branch_performance_csv') }}">Branch CSV</a><a class="button button--secondary" href="{{ path('report_sla_overview_csv') }}">SLA CSV</a></div></div>
+    </section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign In | {{ app_name }}{% endblock %}
+{% block page_heading %}Mudi SACCO Support{% endblock %}
+
+{% block body %}
+    <section class="auth-layout">
+        <form class="auth-form" method="post" action="{{ path('app_login') }}">
+            <div>
+                <p class="section-kicker">Member and staff access</p>
+                <h2>Sign in to manage your support requests</h2>
+            </div>
+
+            {% if error %}
+                {% include 'components/_error_state.html.twig' with { message: error.messageKey|trans(error.messageData, 'security') } only %}
+            {% endif %}
+
+            {% include 'components/_form_field.html.twig' with { label: 'Email address', name: '_username', type: 'email', value: last_username, required: true } only %}
+            {% include 'components/_form_field.html.twig' with { label: 'Password', name: '_password', type: 'password', required: true } only %}
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <button class="button button--primary" type="submit">Sign in</button>
+            <div class="row-actions">
+                <a class="table-link" href="{{ path('password_request') }}">Reset password</a>
+                <a class="table-link" href="{{ path('member_register') }}">Register member account</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

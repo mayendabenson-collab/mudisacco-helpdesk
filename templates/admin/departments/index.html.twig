@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Departments | Admin | {{ app_name }}{% endblock %}
+{% block page_heading %}Departments{% endblock %}
+
+{% block topbar_actions %}
+    {% include 'components/_button_link.html.twig' with { href: path('admin_department_new'), label: 'Add department', variant: 'primary' } only %}
+{% endblock %}
+
+{% block body %}
+<section class="page-section panel-section">
+    <div class="section-header">
+        <div>
+            <p class="section-kicker">Organisation</p>
+            <h2>All departments</h2>
+        </div>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Staff</th>
+                <th>Categories</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dept in departments %}
+            <tr class="{{ dept.active ? '' : 'row--inactive' }}">
+                <td><strong>{{ dept.name }}</strong></td>
+                <td><code>{{ dept.code }}</code></td>
+                <td>{{ dept.description ?? '—' }}</td>
+                <td>
+                    <span class="badge badge--{{ dept.active ? 'success' : 'neutral' }}">
+                        {{ dept.active ? 'Active' : 'Inactive' }}
+                    </span>
+                </td>
+                <td>{{ dept.staffMembers|length }}</td>
+                <td>{{ dept.categories|length }}</td>
+                <td class="actions">
+                    <a class="button button--secondary button--small" href="{{ path('admin_department_edit', {id: dept.id}) }}">Edit</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">
+                    {% include 'components/_empty_state.html.twig' with { title: 'No departments', message: 'Add your first department to get started.' } only %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

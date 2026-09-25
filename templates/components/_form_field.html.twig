@@ -1,0 +1,4 @@
+<label class="form-field">
+    <span>{{ label }}</span>
+    <input class="input" type="{{ type|default('text') }}" name="{{ name }}" value="{{ value|default('') }}" {% if required|default(false) %}required{% endif %}>
+</label>
